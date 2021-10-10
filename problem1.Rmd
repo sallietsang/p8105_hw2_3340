@@ -1,0 +1,95 @@
+---
+title: "homework 2"
+author: "Sze Pui Tsang"
+date: "10/9/2021"
+output: html_document
+---
+
+```{r library}
+library(tidyverse)
+library(readxl)
+library(dplyr)
+```
+
+# Problem 1
+
+```{r define path}
+path_of_data = "C:/Users/Yang/Desktop/st3340_p8105_classex/data_hw2/Trash-Wheel-Collection-Totals-7-2020-2.xlsx"
+```
+
+```{r import the dataframe}
+mr_trash_df = 
+  read_excel( 
+    path = path_of_data,
+    sheet = "Mr. Trash Wheel"
+    )
+```
+
+We have to clean the table by cleaning up the variable names,
+omitting the missing value abd rounding the number of sport balls to 
+the nearest integer
+
+```{r clean the data frame}
+clean_mr_trash_df = mr_trash_df %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster) %>%
+  mutate ( 
+    sports_balls = round(sports_balls, digits = 0)
+  )
+  
+``` 
+
+Read and clean precipitation data for 2018. 
+```{r Read data for 2018}
+precipitation_18_df= read_excel( 
+    path = path_of_data,
+    sheet = "2018 Precipitation",
+    range = "A2:B14")
+```
+
+```{r clean data for 2018}
+precipitation_18_df = precipitation_18_df %>%
+  janitor :: clean_names() %>%
+  drop_na(month) %>%
+  mutate(year =2018) %>%
+  relocate(year, .before = "month")%>%
+  mutate(
+    total = round(total, digit = 1)
+  )
+```
+
+Read and clean precipitation data for 2019.
+```{r clean data for 2019}
+precipitation_19_df= read_excel( 
+    path = path_of_data,
+    sheet = "2019 Precipitation",
+    range = "A2:B14")%>%
+  janitor :: clean_names() %>%
+  drop_na(month)%>%
+  mutate(year =2019)%>%
+  relocate(year, .before = "month")%>%
+  mutate(
+    total = round(total, digit = 1)
+  )
+```
+
+Combind precipitation dataset and convert month into a character variable
+```{r combind the two dataset}
+month_df =
+  tibble(
+    month = 1:12,
+    month_name = month.name)
+
+precipitation_18and19_df = bind_rows(precipitation_18_df,precipitation_19_df)
+
+precipitation_18and19_df = left_join(precipitation_18and19_df, month_df, by="month")
+```
+
+view the dataset
+```{r}
+median(precipitation_19_df$total)
+sum(precipitation_18_df$total)
+```
+
+The median number of sports balls in a dumpster in 2019 was 3.35
+The total precipitation in 2018 was 70.3 inches 
